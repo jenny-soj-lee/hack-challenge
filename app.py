@@ -34,6 +34,17 @@ def add_past_course(course_id):
     user.past_courses.append(course.serialize())
     return success_response(course.serialize())
 
+# delete a past course
+@app.route("/api/user/<int:course_id>/past/", methods = ["DELETE"])
+def delete_past_course(course_id):
+    #given course id, filter past_courses to see if student has taken course
+    #if yes, remove course from list of past_courses
+    user = User.query.filter_by(id = 0).first()
+    if user is None:
+        return failure_response("User not found!")
+    
+
+
 # get all past courses
 @app.route("/api/user/past/", methods = ["GET"])
 def get_past_courses():
@@ -54,7 +65,7 @@ def add_current_course(course_id):
     user.current_courses.append(course.serialize())
     return success_response(course.serialize())
 
-# get all past courses
+# get all current courses
 @app.route("/api/user/current/", methods = ["GET"])
 def get_current_courses():
     user = User.query.filter_by(id = 0).first()
