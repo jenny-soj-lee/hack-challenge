@@ -42,7 +42,6 @@ def delete_past_course(course_id):
     user = User.query.filter_by(id = 0).first()
     if user is None:
         return failure_response("User not found!")
-    past_courses = user.past_courses
     
 
 
