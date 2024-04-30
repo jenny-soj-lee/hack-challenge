@@ -34,8 +34,23 @@ def add_past_course(course_id):
     user.past_courses.append(course.serialize())
     return success_response(course.serialize())
 
+# get all past courses
+""" TODO """
 
+# add a current course
+@app.route("/api/user/<int:course_id>/current/", methods =["POST"])
+def add_current_course(course_id):
+    course = Course.query.filter_by(id = course_id).first()
+    if course is None:
+        return failure_response("Course not found!")
+    user = User.query.filter_by(id = 0).first()
+    if user is None:
+        return failure_response("User not found!")
+    user.current_courses.append(course.serialize())
+    return success_response(course.serialize())
 
+# get all past courses
+""" TODO """
 
 db.init_app(app)
 with app.app_context():
