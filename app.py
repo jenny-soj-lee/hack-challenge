@@ -42,8 +42,11 @@ def delete_past_course(course_id):
     user = User.query.filter_by(id = 0).first()
     if user is None:
         return failure_response("User not found!")
-    
-
+    past_courses = user.past_courses
+    del_course = past_courses[course_id]
+    del past_courses[del_course]
+    db.session.commit()
+    return success_response(user.past_courses_serialize())
 
 # get all past courses
 @app.route("/api/user/past/", methods = ["GET"])
@@ -71,6 +74,20 @@ def get_current_courses():
     user = User.query.filter_by(id = 0).first()
     if user is None:
         return failure_response("User not found!")
+    return success_response(user.current_courses_serialize())
+
+# delete a current course
+@app.route("/api/user/<int:course_id>/current/", methods = ["DELETE"])
+def delete_current_course(course_id):
+    #given course id, filter current_courses to see if student has saved course
+    #if yes, remove course from list of current_courses
+    user = User.query.filter_by(id = 0).first()
+    if user is None:
+        return failure_response("User not found!")
+    current_courses = user.current_courses
+    del_course = current_courses[course_id]
+    del current_courses[del_course]
+    db.session.commit()
     return success_response(user.current_courses_serialize())
 
 db.init_app(app)
