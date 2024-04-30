@@ -8,7 +8,7 @@ class Student(db.Model):
   name = db.Column(db.String, nullable = False)
   past_courses = db.relationship("Past Courses", cascade = "delete")
   def __init__(self, **kwargs):
-    self.code = kwargs.get("code")
+    self.id = kwargs.get("id")
     self.name = kwargs.get("name")
   def simple_serialize(self):
     return {

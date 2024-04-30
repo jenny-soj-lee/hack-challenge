@@ -18,12 +18,14 @@ def add_past_course(course_id):
     if course is None:
         return failure_response("Course not found!")
     body = json.loads(request.data)
-    user_id = body.get("user_id")
-    user = User.query.filter_by(id = user_id).first()
+    student_id = body.get("user_id")
+    student = Student.query.filter_by(id = student_id).first()
     if user is None:
         return failure_response("User not found!")
-    student.past_Ccourses.append(course.serialize())
+    student.past_courses.append(course.serialize())
     return success_response(course.serialize())
+
+
 
 
 db.init_app(app)
