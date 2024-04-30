@@ -15,4 +15,11 @@ class User(db.Model):
       "past courses": [p.serialize() for p in self.past_courses],
       "current courses": [c.serialize() for c in self.current_courses]
     }
-  
+  def past_courses_serialize(self):
+    return {
+      "past courses": [p.serialize() for p in self.past_courses]
+    }  
+  def current_courses_serialize(self):
+    return {
+      "current courses": [c.serialize() for c in self.current_courses]
+    }  

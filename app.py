@@ -35,7 +35,12 @@ def add_past_course(course_id):
     return success_response(course.serialize())
 
 # get all past courses
-""" TODO """
+@app.route("/api/user/past/", methods = ["GET"])
+def get_past_courses():
+    user = User.query.filter_by(id = 0).first()
+    if user is None:
+        return failure_response("User not found!")
+    return success_response(user.past_courses_serialize())
 
 # add a current course
 @app.route("/api/user/<int:course_id>/current/", methods =["POST"])
@@ -50,7 +55,12 @@ def add_current_course(course_id):
     return success_response(course.serialize())
 
 # get all past courses
-""" TODO """
+@app.route("/api/user/current/", methods = ["GET"])
+def get_current_courses():
+    user = User.query.filter_by(id = 0).first()
+    if user is None:
+        return failure_response("User not found!")
+    return success_response(user.current_courses_serialize())
 
 db.init_app(app)
 with app.app_context():
