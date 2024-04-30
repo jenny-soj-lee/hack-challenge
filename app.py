@@ -2,7 +2,7 @@ import json
 from db import db
 from flask import Flask, request
 from db import Course
-from db import Student
+from db import User
 
 app = Flask(__name__)
 db_filename = "cms.db"
@@ -11,18 +11,27 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 
+# create student
+@app.route("/api/user/", methods = ["POST"])
+def create_user():
+    body = json.loads(request.data)
+    new_user = User (
+        name = body.get("name")
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    return success_response(new_user.serialize(), 201)
+
 # add a past course
 @app.route("/api/user/<int:course_id>/past/", methods =["POST"])
 def add_past_course(course_id):
     course = Course.query.filter_by(id = course_id).first()
     if course is None:
         return failure_response("Course not found!")
-    body = json.loads(request.data)
-    student_id = body.get("user_id")
-    student = Student.query.filter_by(id = student_id).first()
-    if student is None:
+    user = User.query.filter_by(id = 0).first()
+    if user is None:
         return failure_response("User not found!")
-    student.past_courses.append(course.serialize())
+    user.past_courses.append(course.serialize())
     return success_response(course.serialize())
 
 
