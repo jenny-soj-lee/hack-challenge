@@ -11,7 +11,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 
-# create student
+# create user
 @app.route("/api/user/", methods = ["POST"])
 def create_user():
     body = json.loads(request.data)
