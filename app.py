@@ -1,4 +1,4 @@
-import datetime
+import time
 import json
 from db import Course, db
 from flask import Flask, request
@@ -53,51 +53,30 @@ def delete_course(id):
     db.session.commit()
     return success_response(course.serialize())
 
-@app.route('/api/plan/', methods=['GET'])
+@app.route('/api/suggestedcourses/', methods=['GET'])
 def get_suggested_courses():
-    body = json.loads(request.data)
-    prefix = body.get('prefix')
-    start_time = body.get('start_time')
-    end_time = body.get('end_time')
+    prefix = request.args.get('prefix')
+    day = request.args.get('day')
+    start_time = request.args.get('start_time')
+    end_time = request.args.get('end_time')
 
-    if not prefix or not start_time or not end_time:
-        return failure_response("Prefix, start_time and end_time parameters are required", code=400)
+    if not prefix or not start_time or not end_time or not day:
+        return failure_response("Prefix, day, start_time and end_time parameters are required", code=400)
 
+    if int(day)<1 or int(day)>7:
+        return failure_response("days needs to be between 1 (Monday) and 7 (Sunday)")
+    
     try:
-        start_time = datetime.strptime(start_time, '%H:%M').time()  # assuming time is given as 'HH:MM'
-        end_time = datetime.strptime(end_time, '%H:%M').time()
+        time.strptime(start_time, '%H:%M') 
+        time.strptime(end_time, '%H:%M')
     except ValueError:
         return failure_response("Invalid time format, use 'HH:MM'", code=400)
     
-    courses = Course.query.filter(Course.prefix == prefix, Course.start_time >= start_time, Course.end_time <= end_time).all()
+    courses = Course.query.filter(Course.code.startswith(prefix), 
+                                  Course.start_time >= start_time, 
+                                  Course.end_time <= end_time, 
+                                  Course.days.contains(day)).all()
     return success_response({"courses": [course.serialize() for course in courses]})
-
-@app.route('/api/plan/<int:id>/', methods=['GET'])
-def get_suggested_course(id):
-    body = json.loads(request.data)
-    prefix = body.get('prefix')
-    start_time = body.get('start_time')
-    end_time = body.get('end_time')
-
-    if not prefix or not start_time or not end_time:
-        return failure_response("Prefix, start_time and end_time parameters are required", code=400)
-
-    try:
-        start_time = datetime.strptime(start_time, '%H:%M').time()  # assuming time is given as 'HH:MM'
-        end_time = datetime.strptime(end_time, '%H:%M').time()
-    except ValueError:
-        return failure_response("Invalid time format, use 'HH:MM'", code=400)
     
-    course = Course.query.filter_by(id=id).filter(
-        Course.prefix == prefix,
-        Course.start_time >= start_time,
-        Course.end_time <= end_time
-    ).first()   
-
-    if not course:
-        return failure_response("No suitable course found", code=404)
-
-    return success_response(course.serialize())
-
-
-    
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000, debug=True)
