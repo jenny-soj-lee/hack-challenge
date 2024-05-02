@@ -1,63 +1,55 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
+from sqlalchemy.event import listen
 
 db = SQLAlchemy()
 
-class User(db.Model):
-  __tablename__ = "user"
-  name = db.Column(db.String, nullable = False)
-  past_courses = db.relationship("Past Courses", cascade = "delete")
-  current_courses = db.relationship("Current Courses", cascade = "delete") 
-  def __init__(self, **kwargs):
-    self.name = kwargs.get("name")
-  def simple_serialize(self):
-    return {
-      "name": self.name,
-      "past courses": [p.serialize() for p in self.past_courses],
-      "current courses": [c.serialize() for c in self.current_courses]
-    }
-  def past_courses_serialize(self):
-    return {
-      "past courses": [p.serialize() for p in self.past_courses]
-    }  
-  def current_courses_serialize(self):
-    return {
-      "current courses": [c.serialize() for c in self.current_courses]
-    }  
 
-
-course_day_association = db.Table('course_days',
-    db.Column('course_id', db.Integer, db.ForeignKey('course.id'), primary_key=True),
-    db.Column('day_id', db.Integer, db.ForeignKey('day.id'), primary_key=True)
-)
-
-
-
-class Day(db.Model):
+#classes
+class Course(db.Model):
     """
-    Day Model for scheduling purposes
+    Course Model
     """
-
-    __tablename__ = "day"
+    __tablename__ = "course"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String, nullable=False)  
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'))  
-    courses = db.relationship('Course', secondary='course_day_association', back_populates='days')
+    code = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False)
+    days = db.Column(db.String, nullable=False)
+    start_time = db.Column(db.String, nullable=True) 
+    end_time = db.Column(db.String, nullable=True)    
 
     def __init__(self, **kwargs):
+        self.code = kwargs.get("code", "")
         self.name = kwargs.get("name", "")
+        self.days = kwargs.get("days", "")
+        self.start_time = kwargs.get("start_time", None)
+        self.end_time = kwargs.get("end_time", None)
 
     def serialize(self):
         """
-        Serialize a day object, potentially including time slots
+        Serialize a course object
         """
         return {
             "id": self.id,
+            "code": self.code,
             "name": self.name,
+            "days": self.days,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
         }
 
+#course data
+#Days: Monday=1, Tuesday=2, Wednesday=3, Thursday=4, Friday=5, Saturday=6, Sunday=7
 
-
-
-
+@event.listens_for(Course.__table__, 'after_create')
+def insert_initial_values(*args, **kwargs):
+    db.session.add(Course(code='CS 1110',       name='Programming with Python', days='1 3 5', start_time='09:00', end_time='10:00'))
+    db.session.add(Course(code='CS 2110',       name='Programming with Java', days='2 4 5', start_time='10:00', end_time='11:00'))
+    db.session.add(Course(code='MATH 1910',     name='Calculus II', days='1 2 3', start_time='11:00', end_time='12:00'))
+    db.session.add(Course(code='MATH 1920',     name='Calculus III', days='5 6 7', start_time='12:00', end_time='13:00'))
+    db.session.add(Course(code='PHYS 1112',     name='Physics I', days='3 5', start_time='13:00', end_time='14:00'))
+    db.session.add(Course(code='PHYS 2213',     name='Physics II', days='1 3', start_time='14:00', end_time='15:00'))
+    db.session.commit()
+    print('course initial values created')
 
 
