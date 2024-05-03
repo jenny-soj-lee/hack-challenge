@@ -61,7 +61,7 @@ def get_courses():
     if courses:
         return success_response({"courses": courses})
     else:
-        return failure_response({"error": "no courses"}), 400
+        return failure_response({"error": "no courses"}), 404
 
 
 
@@ -110,7 +110,7 @@ def get_course(id):
     """
     course = Course.query.filter_by(id=id).first()
     if course is None:
-        return failure_response("Course not found")
+        return failure_response("Course not found",404)
     return success_response(course.serialize())
 
 
@@ -134,7 +134,7 @@ def get_suggested_courses():
     for day in day_list:
         day_int = int(day)
         if day_int < 1 or day_int > 7:
-            return json.dumps({"error": "Day must be from 1 to 7"}), 401
+            return json.dumps({"error": "Day must be from 1 to 7"}), 400
         day_ints.append(day_int)
   
     courses = Course.query.filter(Course.code.startswith(prefix), Course.start_time >= start_time,  Course.end_time <= end_time).all()
@@ -145,7 +145,7 @@ def get_suggested_courses():
         if set(day_ints).issubset(course_days):
             filtered_courses.append(course.serialize())
 
-    return success_response({"courses": filtered_courses})
+    return success_response({"courses": filtered_courses}, 201)
  
  #create student
 @app.route("/api/user/", methods = ["POST"])
@@ -155,6 +155,8 @@ def create_user():
      
      """
      body = json.loads(request.data)
+     if body.get("name") is None:
+         return json.dumps({"error": "fill in name"}), 400
      new_user = User (
          name = body.get("name")
      )
